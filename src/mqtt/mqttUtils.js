@@ -1,4 +1,5 @@
 const mqtt = require("mqtt")
+require('dotenv').config();
 
 const mqttOptions = {
     host: process.env.MQTT_HOST,
