@@ -1,5 +1,7 @@
 const mqtt = require("mqtt")
 require('dotenv').config();
+require('../controllers/emailController')
+const {sendNewTimeslotsEmail} = require("../controllers/emailController");
 
 const mqttOptions = {
     host: process.env.MQTT_HOST,
@@ -8,17 +10,28 @@ const mqttOptions = {
     username: process.env.MQTT_USERNAME,
     password: process.env.MQTT_PASSWORD
 }
+// Sync topics during integration
+const subscriptionTopics = [
+    'grp20/clinic/new/timeslot',
+]
 
 const client = mqtt.connect(mqttOptions)
 
 client.on("message", (topic, message) => {
-    console.log('Topic ' + topic)
-    console.log('Message received ' + message)
+    console.log('Topic: ' + topic)
+    console.log('Message received: ' + message)
+    switch (topic) {
+        case 'grp20/clinic/new/timeslot':
+            sendNewTimeslotsEmail()
+            break
+        default:
+            console.log('Unrecognised topic')
+    }
 })
 
 client.on("connect", () => {
-    console.log("Succesfully connected to broker")
-    client.subscribe('grp20/test/')
+    console.log("Successfully connected to broker")
+    client.subscribe(subscriptionTopics)
 })
 
 client.on("reconnect", () => {
