@@ -1,7 +1,8 @@
 const mqtt = require("mqtt")
 require('dotenv').config();
-require('../controllers/emailController')
-const {sendNewTimeslotsEmail} = require("../controllers/emailController");
+require('../email/emailController')
+const {sendNewTimeslotsEmail} = require("../email/emailController");
+const {connectToDB, subToEmails, unsubFromEmails} = require('../database/databaseController')
 
 const mqttOptions = {
     host: process.env.MQTT_HOST,
@@ -11,8 +12,11 @@ const mqttOptions = {
     password: process.env.MQTT_PASSWORD
 }
 // Sync topics during integration
+// add req and res
 const subscriptionTopics = [
     'grp20/clinic/new/timeslot',
+    'grp20/req/notification/sub',
+    'grp20/req/notification/unsub'
 ]
 
 const client = mqtt.connect(mqttOptions)
@@ -24,18 +28,25 @@ client.on("message", (topic, message) => {
         case 'grp20/clinic/new/timeslot':
             sendNewTimeslotsEmail()
             break
+        case 'grp20/req/notification/sub':
+            subToEmails(message)
+            break
+        case 'grp20/req/notification/unsub':
+            unsubFromEmails(message)
+            break
         default:
             console.log('Unrecognised topic')
+            connectToDB()
     }
 })
 
 client.on("connect", () => {
-    console.log("Successfully connected to broker")
+    console.log("Req client Successfully connected to broker")
     client.subscribe(subscriptionTopics)
 })
 
 client.on("reconnect", () => {
-    console.log("Reconnecting to broker...")
+    console.log("Req client Reconnecting to broker...")
 })
 
 client.on("error", (error) => {
@@ -43,7 +54,7 @@ client.on("error", (error) => {
 })
 
 client.on("close", () => {
-    console.log("Disconnected from broker")
+    console.log("Req client Disconnected from broker")
 })
 
 module.exports = {client}
