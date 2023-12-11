@@ -37,7 +37,7 @@ async function subToEmails(message) {
 
         if (validationError) {
             console.error(validationError)
-            const response = await formatResponse(parsedMessage, '504', 'Validation error')
+            const response = await formatResponse(parsedMessage, '400', 'Validation error')
             await publishResponse('grp20/res/notification/sub', response) 
         }  else {
             console.log('Validation passed');
