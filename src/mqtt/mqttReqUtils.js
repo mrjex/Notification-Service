@@ -2,7 +2,7 @@ const mqtt = require("mqtt")
 require('dotenv').config();
 require('../email/emailController')
 const {sendNewTimeslotsEmail} = require("../email/emailController");
-const {connectToDB, subToEmails, unsubFromEmails} = require('../database/databaseController')
+const {connectToDB, subToEmails, unsubFromEmails, getSubscriber} = require('../database/databaseController')
 
 const mqttOptions = {
     host: process.env.MQTT_HOST,
@@ -16,7 +16,8 @@ const mqttOptions = {
 const subscriptionTopics = [
     'grp20/clinic/new/timeslot',
     'grp20/req/notification/sub',
-    'grp20/req/notification/unsub'
+    'grp20/req/notification/unsub',
+    'grp20/req/subscriber/get'
 ]
 
 const client = mqtt.connect(mqttOptions)
@@ -33,6 +34,9 @@ client.on("message", (topic, message) => {
             break
         case 'grp20/req/notification/unsub':
             unsubFromEmails(message)
+            break
+        case 'grp20/req/subscriber/get':
+            getSubscriber(message)
             break
         default:
             console.log('Unrecognised topic')
