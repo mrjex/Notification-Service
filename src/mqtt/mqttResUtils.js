@@ -41,21 +41,44 @@ async function publishResponse(topic, message, next) {
         console.error(err)
     }
 }
-
-async function formatResponse(message, statusCode, errorMessage) {
-    let responseMessage
+// Formats mqtt response to be sent with the nessecary data
+async function formatResponse(message, statusCode, errorMessage, responseType) {
+        let responseMessage
     try {
-        // const parsedMessage = JSON.parse(message)
-        responseMessage = {
-            "requestID": message.requestID,
-            "status": statusCode,
-            "message": errorMessage,
-            "subscriber": {
-                "patient_ID": message.patient_ID,
-                "email": message.email,
-                "clinic": message.clinic
+        if (responseType === 'sub found' || responseType === 'document saved') {
+                responseMessage = {
+                    "requestID": message.requestID,
+                    "status": statusCode,
+                    "subscriber": message.subscriber
+                } 
+        }   else if(responseType === 'sub not found') {
+                responseMessage = {
+                    "requestID": message.requestID,
+                    "status": statusCode,
+                    "message": errorMessage,
+                    "subscriber": {
+                        "patient_ID": message.patient_ID,
+                }
+            }
+        }   else if(responseType === 'invalid document') {
+                responseMessage = {
+                    "requestID": message.requestID,
+                    "status": statusCode,
+                    "message": errorMessage,
+                    "subscriber": {
+                        "patient_ID": message.patient_ID,
+                        "email": message.email,
+                        "clinic": message.clinic
+                }
+            }
+        }   else {
+                responseMessage = {
+                    "requestID": message.requestID,
+                    "status": statusCode,
+                    "message": errorMessage,
             }
         }
+        
     } catch (err) {
         console.error(err)
     }
