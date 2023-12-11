@@ -1,6 +1,6 @@
 // EmailController provides methods to send emails
-const {sendEmail} = require('../email/nodemailer')
-const {newTimeslotsEmail} = require('../email/templates/newTimeslots.js')
+const {sendEmail} = require('./nodemailer')
+const {newTimeslotsEmail} = require('./templates/newTimeslots.js')
 
 async function sendNewTimeslotsEmail() {
     try {
