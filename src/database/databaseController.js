@@ -19,11 +19,40 @@ async function connectToDB() { // Proving db connection with a ping for devs
         console.log('Closed mongo connection')
     }
 }
+// Gets which clinics a user is currently subscribed to
+async function getSubscriber(message) {
+    try {
+        let parsedMessage = JSON.parse(message)
+        const patient_ID = {patient_ID: parsedMessage.patient_ID}
+
+        await dbClient.connect()
+        console.log('Opened db connection')
+        const db = dbClient.db(dbName)
+        const collection = db.collection("Subscribers")
+        const subscriber = await collection.findOne(patient_ID)
+        console.log('Looking for subscriber')
+
+        if (subscriber === null) { // Fail case no matching subscriber found
+            const response = await formatResponse(parsedMessage, '404', 'Subscriber not found', 'sub not found')
+            await publishResponse('grp20/res/subscriber/get', response)
+        } else {                   // Success case, matching subscriber found
+            parsedMessage.subscriber = subscriber
+            const response = await formatResponse(parsedMessage, '200', null, 'sub found')
+            await publishResponse('grp20/res/subscriber/get', response)
+        }
+
+    } catch (err) {
+        console.error('GETSUBSCRIBER ERROR', err)
+    } finally {
+        await dbClient.close();
+        console.log('Closed mongo connection')
+    }
+} 
 // Subscribe patient to emails by adding them to the notification database.
 async function subToEmails(message) {
     try {
-        const pay = message.toString()
-        const parsedMessage = JSON.parse(pay)
+        // const pay = message.toString()
+        const parsedMessage = JSON.parse(message)
         
         await dbClient.connect()
         console.log('Opened db connection')
@@ -37,17 +66,19 @@ async function subToEmails(message) {
 
         if (validationError) {
             console.error(validationError)
-            const response = await formatResponse(parsedMessage, '400', 'Validation error')
+            const response = await formatResponse(parsedMessage, '400', 'Validation error', 'invalid document')
             await publishResponse('grp20/res/notification/sub', response) 
         }  else {
             console.log('Validation passed');
             
             const db = dbClient.db(dbName)
-            const collection = db.collection("Subscribers") // Reference the collection in the specified database
+            const collection = db.collection("Subscribers")
             const document = await collection.insertOne(newSubscriber)
+            console.log('Saving document')
             console.log('Save Succsesful, saved document:', document)
-
-            const response = await formatResponse(parsedMessage, '201')
+            parsedMessage.subscriber = document
+            
+            const response = await formatResponse(parsedMessage, '201', null, 'document saved')
             await publishResponse('grp20/res/notification/sub', response)
         }
 
@@ -67,15 +98,17 @@ async function unsubFromEmails(message) {
         await dbClient.connect()
         console.log('Opened db connection')
         const db = dbClient.db(dbName)
-        const collection = db.collection("Subscribers") // Reference the collection in the specified database
+        const collection = db.collection("Subscribers")
         const subscriber = await collection.findOneAndDelete(patient_ID)
+        console.log('Looking for subscriber')
 
         if (subscriber === null) { // Fail case no matching subscriber found
-            const response = await formatResponse(parsedMessage, '404', 'Subscriber not found')
+            const response = await formatResponse(parsedMessage, '404', 'Subscriber not found', 'sub not found')
             console.log('Delete failed:', subscriber, response)
             await publishResponse('grp20/res/notification/unsub', response)
         } else {                   // Success case, matching subscriber found
-            const response = await formatResponse(parsedMessage, '200')
+            parsedMessage.subscriber = subscriber
+            const response = await formatResponse(parsedMessage, '200', null, 'sub found')
             console.log('Delete successful', subscriber, response)
             await publishResponse('grp20/res/notification/unsub', response)
         }
@@ -88,4 +121,4 @@ async function unsubFromEmails(message) {
 
 }
 
-module.exports = {connectToDB, subToEmails, unsubFromEmails}
+module.exports = {connectToDB, subToEmails, unsubFromEmails, getSubscriber}
