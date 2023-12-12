@@ -2,22 +2,18 @@ const mqtt = require("mqtt")
 require('dotenv').config();
 require('../email/emailController')
 const {sendNewTimeslotsEmail, getRecieverList} = require("../email/emailController");
-const {subToEmails, unsubFromEmails, getSubscriber} = require('../database/databaseController')
+const {subToEmails, unsubFromEmails, getSubscriber} = require('../database/subscribersController')
 
 const mqttOptions = {
     host: process.env.MQTT_HOST,
-    port: process.env.MQTT_PORT,
-    protocol: process.env.MQTT_PROTOCOL,
-    username: process.env.MQTT_USERNAME,
-    password: process.env.MQTT_PASSWORD
+    port: process.env.MQTT_PORT
 }
 // TOPICS NEEDS TO BE SYNCED
 const subscriptionTopics = [
-    'grp20/clinic/new/timeslot/+',
     'grp20/req/notification/sub',
     'grp20/req/notification/unsub',
     'grp20/req/subscriber/get',
-    'grp20/req/get/list'
+    'grp20/availabletimes/live/+'
 ]
 
 const client = mqtt.connect(mqttOptions)
@@ -26,9 +22,6 @@ client.on("message", (topic, message) => {
     console.log('Topic: ' + topic)
     console.log('Message received: ' + message)
     switch (topic) {
-        case 'grp20/clinic/new/timeslot':
-            sendNewTimeslotsEmail(topic)
-            break
         case 'grp20/req/notification/sub':
             subToEmails(message)
             break
@@ -38,13 +31,10 @@ client.on("message", (topic, message) => {
         case 'grp20/req/subscriber/get':
             getSubscriber(message)
             break
-        case 'grp20/req/get/list':
-            getRecieverList()
-            break
         default:
             console.log('Unrecognised topic')
     }
-    if (topic.includes('grp20/clinic/new/timeslot')) { // proof of concept
+    if (topic.includes('grp20/availabletimes/live/')) { // proof of concept
         sendNewTimeslotsEmail(topic)
     }
 })
