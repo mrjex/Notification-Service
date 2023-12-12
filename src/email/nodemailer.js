@@ -2,7 +2,7 @@ const nodemailer = require('nodemailer')
 require('dotenv').config();
 
 /* Note:
-   It is hard to predict the amount of emails that are sent, currently it won't be any significant amount
+   It is hard to predict the amount of emails that are sending, currently it won't be any significant amount
    Therefore I have chosen to create a transport connection whenever a sendEmail() is called rather than
    having a continuous open connection. There might be a case for pooling and having connections open at
    a later stage.

@@ -7,7 +7,8 @@ const sub = require('../database/models/subscriber')
 
 const dbName = process.env.DB_NAME // NotificationService
 
-async function connectToDB() { // Proving db connection with a ping for devs
+// --For devs-- Prove db connection with ping
+async function connectToDB() {
     try {
         await dbClient.connect()
         await dbClient.db(dbName).command({ping: 1});

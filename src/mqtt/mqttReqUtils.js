@@ -44,7 +44,7 @@ client.on("message", (topic, message) => {
         default:
             console.log('Unrecognised topic')
     }
-    if (topic.includes('grp20/clinic/new/timeslot')) { // just proof of concept might need to "swtitch" (badum tss) from switch case
+    if (topic.includes('grp20/clinic/new/timeslot')) { // proof of concept
         sendNewTimeslotsEmail(topic)
     }
 })
