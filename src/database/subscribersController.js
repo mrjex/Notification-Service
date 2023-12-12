@@ -1,9 +1,9 @@
 require('dotenv').config()
 const mongoose = require('mongoose')
-const {dbClient} = require('../database/databaseClient')
+const {dbClient} = require('./databaseClient')
 const {publishResponse, formatResponse} = require('../mqtt/mqttResUtils')
 
-const sub = require('../database/models/subscriber')
+const sub = require('./models/subscriber')
 
 const dbName = process.env.DB_NAME // NotificationService
 
@@ -34,11 +34,11 @@ async function getSubscriber(message) {
         console.log('Looking for subscriber')
 
         if (subscriber === null) { // Fail case no matching subscriber found
-            const response = await formatResponse(parsedMessage, '404', 'Subscriber not found', 'sub not found')
+            const response = await formatResponse(parsedMessage, 404, 'Subscriber not found', 'sub not found')
             await publishResponse('grp20/res/subscriber/get', response)
         } else {                   // Success case, matching subscriber found
             parsedMessage.subscriber = subscriber
-            const response = await formatResponse(parsedMessage, '200', null, 'sub found')
+            const response = await formatResponse(parsedMessage, 200, null, 'sub found')
             await publishResponse('grp20/res/subscriber/get', response)
         }
 
@@ -67,7 +67,7 @@ async function subToEmails(message) {
 
         if (validationError) {
             console.error(validationError)
-            const response = await formatResponse(parsedMessage, '400', 'Validation error', 'invalid document')
+            const response = await formatResponse(parsedMessage, 400, 'Validation error', 'invalid document')
             await publishResponse('grp20/res/notification/sub', response) 
         }  else {
             console.log('Validation passed');
@@ -79,7 +79,7 @@ async function subToEmails(message) {
             console.log('Save Succsesful, saved document:', document)
             parsedMessage.subscriber = document
             
-            const response = await formatResponse(parsedMessage, '201', null, 'document saved')
+            const response = await formatResponse(parsedMessage, 201, null, 'document saved')
             await publishResponse('grp20/res/notification/sub', response)
         }
 
@@ -104,12 +104,12 @@ async function unsubFromEmails(message) {
         console.log('Looking for subscriber')
 
         if (subscriber === null) { // Fail case no matching subscriber found
-            const response = await formatResponse(parsedMessage, '404', 'Subscriber not found', 'sub not found')
+            const response = await formatResponse(parsedMessage, 404, 'Subscriber not found', 'sub not found')
             console.log('Delete failed:', subscriber, response)
             await publishResponse('grp20/res/notification/unsub', response)
         } else {                   // Success case, matching subscriber found
             parsedMessage.subscriber = subscriber
-            const response = await formatResponse(parsedMessage, '200', null, 'sub found')
+            const response = await formatResponse(parsedMessage, 200, null, 'sub found')
             console.log('Delete successful', subscriber, response)
             await publishResponse('grp20/res/notification/unsub', response)
         }
@@ -122,4 +122,30 @@ async function unsubFromEmails(message) {
 
 }
 
-module.exports = {connectToDB, subToEmails, unsubFromEmails, getSubscriber}
+// Returns an array of patients subscribed to a clinic
+async function getRecieverList(clinic){
+    let receiverList = []
+    try {
+        const filter = { clinic: { $eq: clinic } }
+        
+        await dbClient.connect()
+        console.log('Opened db connection')
+        const db = dbClient.db(dbName)
+        const collection = db.collection("Subscribers")
+        const subscribers = collection.find(filter) // returns cursor
+        console.log('Looking for subscribers')
+        
+        for await (const doc of subscribers) {
+            receiverList.push(doc.email)
+          }
+          console.log(receiverList)
+          return receiverList
+    } catch(err) {
+        console.error(err)
+    } finally {
+        await dbClient.close();
+        console.log('Closed mongo connection')
+    }
+}
+
+module.exports = {connectToDB, subToEmails, unsubFromEmails, getSubscriber, getRecieverList}
