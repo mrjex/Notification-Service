@@ -4,12 +4,13 @@ require('dotenv').config();
 /* Note:
    It is hard to predict the amount of emails that are sending, currently it won't be any significant amount
    Therefore I have chosen to create a transport connection whenever a sendEmail() is called rather than
-   having a continuous open connection. There might be a case for pooling and having connections open at
-   a later stage.
+   having a continuous open connection. There might be a case for pooling and having connections open if
+    we determine that it will be a large quantity. I will run calculations on approximatly how many emails,
+    a day the application theoretically will need to handle.
  */
 async function sendEmail(options) {
     const transporter = nodemailer.createTransport({ // NOTE: Be sure to check out the smtp and security settings for your email
-        host: process.env.SMTP_HOST,                           //       I had some issues getting emails identified as spam by the receiving server.
+        host: process.env.SMTP_HOST,                 //       I had some issues getting emails identified as spam by the receiving server.
         secureConnection: false,
         port: process.env.SMTP_PORT,
         service: process.env.EMAIL_SERVICE,
