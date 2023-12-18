@@ -122,6 +122,40 @@ async function unsubFromEmails(message) {
 
 }
 
+// Update a subscribers clinic preffrence. 
+// This function currently only updates a subscribers clinic choice as the platform currently does not allow changes to email adress.
+async function updateSubscriber(message) {
+    try {
+        const parsedMessage = JSON.parse(message)
+        const patient_ID = {patient_ID: parsedMessage.patient_ID}
+        const clinic = {clinic: parsedMessage.clinic}
+
+        await dbClient.connect()
+        const collection = dbClient.db(dbName).collection("Subscribers");
+        
+        const subscriber = await collection.updateOne(patient_ID, {$set:clinic})
+        parsedMessage.subscriber = subscriber       
+        
+        let response
+        if (subscriber.modifiedCount === 0) {    // Fail case no document modified
+            if (subscriber.matchedCount === 0) { // no matching subscriber found
+                response = await formatResponse(parsedMessage, 404, 'Subscriber not found', 'sub not found')
+            } else {
+                response = await formatResponse(parsedMessage, 400, 'New value is old value', 'new is old')
+            }
+        } else {                                  // Success case, matching subscriber found
+            response = await formatResponse(parsedMessage, 200, null, 'sub found')
+        }
+        await publishResponse('grp20/res/subscriber/update', response)
+    } catch (err) {
+        console.error('UPDATESUBSCRIBERPREFFRENCES ERROR', err)
+    } finally {
+        await dbClient.close();
+        console.log('Closed mongo connection')
+    }
+
+}
+
 // Returns an array of patients subscribed to a clinic
 async function getRecieverList(clinic){
     let receiverList = []
@@ -148,4 +182,4 @@ async function getRecieverList(clinic){
     }
 }
 
-module.exports = {connectToDB, subToEmails, unsubFromEmails, getSubscriber, getRecieverList}
+module.exports = {connectToDB, subToEmails, unsubFromEmails, getSubscriber, getRecieverList, updateSubscriber}
