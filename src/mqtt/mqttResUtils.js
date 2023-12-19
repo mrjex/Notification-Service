@@ -48,7 +48,7 @@ async function formatResponse(message, statusCode, errorMessage, responseType) {
                     "status": statusCode,
                     "subscriber": message.subscriber
                 } 
-        }   else if(responseType === 'sub not found') {
+        }   else if(responseType === 'sub not found' || responseType === 'new is old') {
                 responseMessage = {
                     "requestID": message.requestID,
                     "status": statusCode,
@@ -79,7 +79,6 @@ async function formatResponse(message, statusCode, errorMessage, responseType) {
     } catch (err) {
         console.error(err)
     }
-    console.log('Response message', responseMessage)
     return responseMessage
 }
 
