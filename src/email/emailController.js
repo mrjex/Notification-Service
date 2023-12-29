@@ -1,12 +1,14 @@
 // EmailController provides methods to send emails
 require('dotenv').config()
-const {dbClient} = require('../database/databaseClient')
+const { DateTime } = require("luxon");
 
 const {sendEmail} = require('./nodemailer')
 const {getRecieverList} = require('../database/subscribersController')
 const {newTimeslotsEmail} = require('./templates/newTimeslots.js')
+const {bookingConfirmationEmail} = require('./templates/bookingConfirmation')
+const { getPatient, getDentist } = require('../apiRequests/userRequests')
+const { getClinic } = require('../apiRequests/clinicRequests')
 
-const dbName = process.env.DB_NAME
 
 async function sendNewTimeslotsEmail(topic) {
     try {
@@ -23,6 +25,30 @@ async function sendNewTimeslotsEmail(topic) {
     }
 }
 
+async function sendBookingConfirmationEmail(message) { // TODO: replace email with real data
+    try {
+        message =  JSON.parse(message)
+
+        const patient =  await getPatient(message.patient_id)
+        const dentist =  await getDentist(message.dentist_id)
+        const clinic = await getClinic(message.clinic_id)
+        let start = DateTime.fromISO(message.start_time).toFormat('yy-MM-dd HH:mm')
+        let end = DateTime.fromISO(message.end_time).toFormat('yy-MM-dd HH:mm')
+
+        let email =  await JSON.parse(JSON.stringify(bookingConfirmationEmail))
+
+            email.html = email.html.replace('[patient]', patient.name).replace('[dentist]', dentist.name)
+                                   .replace('[clinic]', clinic.clinic).replace('[location]', clinic.location)
+                                   .replace('[start_time]', start).replace('[end_time]', end)
+            email.to = patient.email + ', ' + dentist.email
+    
+        await sendEmail(email)
+        console.log(email)
+    } catch (err) {
+        console.error(err)
+    }
+}
+
 module.exports = {
-    sendNewTimeslotsEmail, getRecieverList
+    sendNewTimeslotsEmail, sendBookingConfirmationEmail
 };
