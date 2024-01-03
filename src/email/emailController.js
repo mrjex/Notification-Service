@@ -15,14 +15,19 @@ async function sendNewTimeslotsEmail(topic) {
         const topics = topic.split('/')
         const clinic = topics.pop()
         console.log('CLINIC: ', clinic)
-        
-        let email = await JSON.parse(JSON.stringify(newTimeslotsEmail))
-        email.html = email.html.replace('[clinic]', clinic)
-
         receiverList = await getRecieverList(clinic)
-        email.to = receiverList
-        await sendEmail(email)
-        console.log(email)
+        
+        if(receiverList.length > 0) {
+            let email = await JSON.parse(JSON.stringify(newTimeslotsEmail))
+            email.html = email.html.replace('[clinic]', clinic)
+
+            receiverList = await getRecieverList(clinic)
+            email.to = receiverList
+            await sendEmail(email)
+            console.log(email)
+        } else { 
+            console.log('Zero patients subscribed to this clinic')
+        }
     } catch (err) {
         console.error(err)
     }
@@ -33,8 +38,8 @@ async function sendBookingNotificationEmail(topic, message) {
         message =  JSON.parse(message)
 
         const patient = await getPatient(message.appointment.patient_id)
-        const dentist =  await getDentist(message.appointment.dentist_id)
-        const clinic = '' // await getClinic() TODO: Implement get clinic by id from clinic service, currently out of function. 
+        const dentist = await getDentist(message.appointment.dentist_id)
+        const clinic = await getClinic(message.appointment.clinic_id) // TODO: Implement get clinic by id from clinic service, currently out of function. 
         let start = DateTime.fromISO(message.appointment.start_time).toFormat('yy-MM-dd HH:mm')
         let end = DateTime.fromISO(message.appointment.end_time).toFormat('yy-MM-dd HH:mm')
         let email
