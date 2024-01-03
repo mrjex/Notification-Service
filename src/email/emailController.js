@@ -15,11 +15,14 @@ async function sendNewTimeslotsEmail(topic) {
         const topics = topic.split('/')
         const clinic = topics.pop()
         console.log('CLINIC: ', clinic)
+        
+        let email = await JSON.parse(JSON.stringify(newTimeslotsEmail))
+        email.html = email.html.replace('[clinic]', clinic)
 
         receiverList = await getRecieverList(clinic)
-        newTimeslotsEmail.to = receiverList
-        await sendEmail(newTimeslotsEmail)
-        console.log(newTimeslotsEmail)
+        email.to = receiverList
+        await sendEmail(email)
+        console.log(email)
     } catch (err) {
         console.error(err)
     }
