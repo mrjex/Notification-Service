@@ -25,15 +25,15 @@ async function sendNewTimeslotsEmail(topic) {
     }
 }
 
-async function sendBookingNotificationEmail(topic, message) { // TODO: replace email with real data
+async function sendBookingNotificationEmail(topic, message) {
     try {
         message =  JSON.parse(message)
 
-        const patient =  await getPatient(message.patient_id)
-        const dentist =  await getDentist(message.dentist_id)
-        const clinic = await getClinic(message.clinic_id)
-        let start = DateTime.fromISO(message.start_time).toFormat('yy-MM-dd HH:mm')
-        let end = DateTime.fromISO(message.end_time).toFormat('yy-MM-dd HH:mm')
+        const patient = await getPatient(message.appointment.patient_id)
+        const dentist =  await getDentist(message.appointment.dentist_id)
+        const clinic = '' // await getClinic() TODO: Implement get clinic by id from clinic service, currently out of function. 
+        let start = DateTime.fromISO(message.appointment.start_time).toFormat('yy-MM-dd HH:mm')
+        let end = DateTime.fromISO(message.appointment.end_time).toFormat('yy-MM-dd HH:mm')
         let email
         
         if(topic  === 'grp20/req/booking/confirmation') {
@@ -41,7 +41,7 @@ async function sendBookingNotificationEmail(topic, message) { // TODO: replace e
         } else {
             email =  await JSON.parse(JSON.stringify(bookingCancellationEmail))
         }
-            email.html = email.html.replace('[patient]', patient.name).replace('[dentist]', dentist.name)
+            email.html = email.html.replace('[patient]', patient.username).replace('[dentist]', dentist.username)
                                    .replace('[clinic]', clinic.clinic).replace('[location]', clinic.location)
                                    .replace('[start_time]', start).replace('[end_time]', end)
             email.to = patient.email + ', ' + dentist.email
