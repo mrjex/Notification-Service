@@ -17,7 +17,7 @@ test('newTimeslotsEmail is a email template expected to contain', () => {
     expect(bookingConfirmationEmail).toHaveProperty('html')
   })
 
-  test('newTimeslotsEmail is a email template expected to contain', () => {
+  test('bookingCancellationEmail is a email template expected to contain', () => {
     expect(bookingCancellationEmail).toHaveProperty('from')
     expect(bookingCancellationEmail).toHaveProperty('to')
     expect(bookingCancellationEmail).toHaveProperty('subject')
