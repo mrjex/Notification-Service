@@ -1,7 +1,7 @@
 const mqtt = require("mqtt")
 require('dotenv').config();
 require('../email/emailController')
-const {sendNewTimeslotsEmail, getRecieverList} = require("../email/emailController");
+const {sendNewTimeslotsEmail, sendBookingNotificationEmail} = require("../email/emailController");
 const {subToEmails, unsubFromEmails, getSubscriber, updateSubscriber} = require('../database/subscribersController')
 
 const mqttOptions = {
@@ -14,7 +14,9 @@ const subscriptionTopics = [
     'grp20/req/notification/unsub',
     'grp20/req/subscriber/get',
     'grp20/availabletimes/live/+',
-    'grp20/req/subscriber/update'
+    'grp20/req/subscriber/update',
+    'grp20/req/booking/confirmation',
+    'grp20/req/booking/cancellation'
 ]
 
 const client = mqtt.connect(mqttOptions)
@@ -34,6 +36,12 @@ client.on("message", (topic, message) => {
             break
         case 'grp20/req/subscriber/update':
             updateSubscriber(message)
+            break
+        case 'grp20/req/booking/confirmation':
+            sendBookingNotificationEmail(topic, message)
+            break
+        case 'grp20/req/booking/cancellation':
+            sendBookingNotificationEmail(topic, message)
             break
         default:
             console.log('Unrecognised topic')
