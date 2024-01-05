@@ -39,7 +39,7 @@ async function sendBookingNotificationEmail(topic, message) {
 
         const patient = await getPatient(message.appointment.patient_id)
         const dentist = await getDentist(message.appointment.dentist_id)
-        const clinic = await getClinic(message.appointment.clinic_id) // TODO: Implement get clinic by id from clinic service, currently out of function. 
+        const clinic = await getClinic(message.appointment.clinic_id)
         let start = DateTime.fromISO(message.appointment.start_time).toFormat('yy-MM-dd HH:mm')
         let end = DateTime.fromISO(message.appointment.end_time).toFormat('yy-MM-dd HH:mm')
         let email
@@ -50,7 +50,7 @@ async function sendBookingNotificationEmail(topic, message) {
             email =  await JSON.parse(JSON.stringify(bookingCancellationEmail))
         }
             email.html = email.html.replace('[patient]', patient.username).replace('[dentist]', dentist.username)
-                                   .replace('[clinic]', clinic.clinic).replace('[location]', clinic.location)
+                                   .replace('[clinic]', clinic.clinic_name).replace('[location]', clinic.address)
                                    .replace('[start_time]', start).replace('[end_time]', end)
             email.to = patient.email + ', ' + dentist.email
     
