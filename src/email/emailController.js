@@ -1,6 +1,6 @@
-// EmailController provides methods to send emails
+// EmailController provides methods for building and sending emails.
 require('dotenv').config()
-const { DateTime } = require("luxon");
+const { DateTime } = require("luxon")
 const {sendEmail} = require('./nodemailer')
 const {getRecieverList} = require('../database/subscribersController')
 const {newTimeslotsEmail} = require('./templates/newTimeslots.js')
@@ -8,7 +8,7 @@ const {bookingConfirmationEmail} = require('./templates/bookingConfirmation')
 const {bookingCancellationEmail} = require('./templates/bookingCancellation')
 const { getPatient, getDentist } = require('../apiRequests/userRequests')
 const { getClinic } = require('../apiRequests/clinicRequests')
-
+const {failedEmails} = require('./resilientEmailDelivery/failedEmails')
 
 async function sendNewTimeslotsEmail(topic) {
     try {
@@ -57,10 +57,12 @@ async function sendBookingNotificationEmail(topic, message) {
         await sendEmail(email)
         console.log(email)
     } catch (err) {
+        message.topic = topic
+        failedEmails.set(message.requestID, message)
         console.error(err)
     }
 }
 
 module.exports = {
     sendNewTimeslotsEmail, sendBookingNotificationEmail
-};
+}
