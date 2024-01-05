@@ -18,6 +18,7 @@
     "mongodb": "^6.3.0",
     "mongoose": "^8.0.3",
     "mqtt": "^5.3.3",
+    "node-cron": "^3.0.3",
     "nodemailer": "^6.9.7"
   },
   "devDependencies": {
