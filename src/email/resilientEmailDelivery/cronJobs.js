@@ -11,4 +11,10 @@ const resilientEmails = cron.schedule('*/5 0-3,4:15-23 * * *', () => {
     }
 })
 
-module.exports = {resilientEmails}
+// This cron job clears the map of undelivered emails everyday at 04:05.
+const clearUndeliveredEmailsMap = cron.schedule('5 4 * * *', () => {
+    console.log('Clearing some forgotten mail')
+    failedEmails.clear()
+})
+
+module.exports = {resilientEmails, clearUndeliveredEmailsMap}
