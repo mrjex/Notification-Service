@@ -120,25 +120,26 @@ async function unsubFromEmails(message) {
 async function updateSubscriber(message) {
     try {
         const parsedMessage = JSON.parse(message)
+        
         const patient_ID = {patient_ID: parsedMessage.patient_ID}
         const clinic = {clinic: parsedMessage.clinic}
 
         await dbClient.connect()
         const collection = dbClient.db(dbName).collection("Subscribers");
-        
         const subscriber = await collection.updateOne(patient_ID, {$set:clinic})
         parsedMessage.subscriber = subscriber       
         
         let response
-        if (subscriber.modifiedCount === 0) {    // Fail case no document modified
-            if (subscriber.matchedCount === 0) { // no matching subscriber found
+        if (subscriber.modifiedCount === 0) {    // case: no document modified
+            if (subscriber.matchedCount === 0) { // case: no document modified && no matching subscriber --> formatting response to api
                 response = await formatResponse(parsedMessage, 404, 'Subscriber not found', 'sub not found')
-            } else {
+            } else {                             // case: no document modified && new subscriber values are old subscriber values --> formatting response to api
                 response = await formatResponse(parsedMessage, 400, 'New value is old value', 'new is old')
             }
-        } else {                                  // Success case, matching subscriber found
+        } else {                                  // case: subscriber updated with new values --> formatting response to api
             response = await formatResponse(parsedMessage, 200, null, 'sub found')
         }
+
         await publishResponse('grp20/res/subscriber/update', response)
     } catch (err) {
         console.error('UPDATESUBSCRIBERPREFFRENCES ERROR', err)
