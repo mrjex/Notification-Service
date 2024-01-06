@@ -2,24 +2,10 @@ require('dotenv').config()
 const mongoose = require('mongoose')
 const {dbClient} = require('./databaseClient')
 const {publishResponse, formatResponse} = require('../mqtt/mqttResUtils')
-
 const sub = require('./models/subscriber')
 
-const dbName = process.env.DB_NAME // NotificationService
+const dbName = process.env.DB_NAME
 
-// --For devs-- Prove db connection with ping
-async function connectToDB() {
-    try {
-        await dbClient.connect()
-        await dbClient.db(dbName).command({ping: 1});
-        console.log("Pinged your deployment. You successfully connected to MongoDB!")
-
-    } finally {
-        // Ensures that the client will close when you finish/error
-        await dbClient.close();
-        console.log('Closed mongo connection')
-    }
-}
 // Gets which clinics a user is currently subscribed to
 async function getSubscriber(message) {
     try {
@@ -46,7 +32,7 @@ async function getSubscriber(message) {
     } catch (err) {
         console.error('GETSUBSCRIBER ERROR', err)
     } finally {
-        await dbClient.close();
+        await dbClient.close()
         console.log('Closed mongo connection')
     }
 } 
