@@ -97,7 +97,7 @@ async function unsubFromEmails(message) {
     } catch (err) {
         console.error('UNSUBFROMEMAIL ERROR', err)
     } finally {
-        await dbClient.close();
+        await dbClient.close()
         console.log('Closed mongo connection')
     }
 }
@@ -112,7 +112,7 @@ async function updateSubscriber(message) {
         const clinic = {clinic: parsedMessage.clinic}
 
         await dbClient.connect()
-        const collection = dbClient.db(dbName).collection("Subscribers");
+        const collection = dbClient.db(dbName).collection("Subscribers")
         const subscriber = await collection.updateOne(patient_ID, {$set:clinic})
         parsedMessage.subscriber = subscriber       
         
@@ -131,7 +131,7 @@ async function updateSubscriber(message) {
     } catch (err) {
         console.error('UPDATESUBSCRIBERPREFFRENCES ERROR', err)
     } finally {
-        await dbClient.close();
+        await dbClient.close()
         console.log('Closed mongo connection')
     }
 
@@ -157,7 +157,7 @@ async function getRecieverList(clinic){
     } catch(err) {
         console.error(err)
     } finally {
-        await dbClient.close();
+        await dbClient.close()
         console.log('Closed mongo connection')
     }
 }
