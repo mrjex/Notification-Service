@@ -78,16 +78,16 @@ The application is controlled via MQTT which allows the systems other microservi
 The application uses nodemailer to deliver emails all day everyday. Every email contains personalized information and is addressed specifically to you, the dream! Our UI staff has also made sure that all emails are styled to convey that soothing  feeling you have always wanted from a dental email.
 
 ### Subscribe to email notifications
-Users can sign up for email notifications about newly published time slots clinics of their choice. Notification service contains all functionality for creating, reading, updating and deleting "subscribers' '. Once subscribed you get an email every time a dentist at your favorite clinic has a new open slot. Once you have got the time you need you can unsubscribe no hassle baby!
+Users can sign up for email notifications about newly published time slots clinics of their choice. Notification service contains all functionality for creating, reading, updating and deleting "subscribers' '. Once subscribed you get an email every time a dentist at your favorite clinic has a new open slot. Once you have got the time you need you can unsubscribe no hassle.
 
 ### Resilient emails
 Did you not receive your highly sought after cancellation email? Fear not! Notification service runs cron jobs every 5 minutes trying to redeliver your forgotten mail. 
 
 Why would mail not get delivered?
-Because DentaNoid is a system built with a microservices architecture, Notification service is dependent on other services running to get hold of information such as which clinic your appointment is at or what new username your dentist has. In the unlikely event that one of these other services experiences some downtime, Notification Service will fail to deliver your mail immediately. But with the genius inclusion of cron jobs Notification Service makes sure the guys with blue sabers always win by delivering your email as soon as the other services hop back online. 
+Because DentaNoid is a system built with a microservices architecture, Notification service is dependent on other services running to get hold of information such as which clinic your appointment is at or what username your dentist has. In the unlikely event that one of these other services experiences some downtime, Notification Service will fail to deliver your mail immediately. But with the inclusion of cron jobs Notification Service makes sure the guys with blue sabers always win by delivering your email as soon as the other services hop back online. 
 
 ## Support
-If you which to receive help with anything at all regarding Notification Service do not hesitate to reach out to founder, maintainer and spokesperson at gusklouja@student.gu.se
+If you wish to receive help with anything at all regarding Notification Service do not hesitate to reach out to founder, maintainer and spokesperson at gusklouja@student.gu.se
 
 ## Roadmap
 Notification service will be under development during December 2023 and will be realised to the public in early January 2024. 
