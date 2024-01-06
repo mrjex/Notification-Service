@@ -7,7 +7,8 @@ The purpose of this service is to serve the users of the DentaNoid dental visit 
 
 
 ## Visuals
-TBU
+![Booking confirmation email image](bookingConfirmation.png)
+
 ## Installation
 ### Getting started
 
