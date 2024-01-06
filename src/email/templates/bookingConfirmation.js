@@ -3,7 +3,7 @@ require('dotenv').config()
 
 const bookingConfirmationEmail = {
     from: process.env.EMAIL_SENDER,
-    to: "", // To will be populated.
+    to: "", // to is populated later by emailController.
     subject: "Booking confirmation",
     html: `
     <style>

@@ -44,9 +44,9 @@ async function sendBookingNotificationEmail(topic, message) {
         let end = DateTime.fromISO(message.appointment.end_time).toFormat('yy-MM-dd HH:mm')
         let email
         
-        if(topic  === 'grp20/req/booking/confirmation') {
+        if(topic  === 'grp20/req/booking/confirmation') { // Case confirmation
             email =  await JSON.parse(JSON.stringify(bookingConfirmationEmail))
-        } else {
+        } else {                                          // Case cancellation
             email =  await JSON.parse(JSON.stringify(bookingCancellationEmail))
         }
             email.html = email.html.replace('[patient]', patient.username).replace('[dentist]', dentist.username)

@@ -3,7 +3,7 @@ require('dotenv').config()
 
 const newTimeslotsEmail = {
     from: process.env.EMAIL_SENDER,
-    to: "", // To will be inserted with a list from the database.
+    to: "", // to is populated later by emailController.
     subject: "There are new timeslots available!",
     html: `<style>
               body {
