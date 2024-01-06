@@ -7,7 +7,8 @@ The purpose of this service is to serve the users of the DentaNoid dental visit 
 
 
 ## Visuals
-![Booking confirmation email image](bookingConfirmation.png)
+<img src="bookingConfirmation.png" alt="Booking confirmation email image" width="195" />
+
 
 ## Installation
 ### Getting started
@@ -93,7 +94,7 @@ Notification service will be under development during December 2023 and will be 
 ## Contributing
 Dev: James A.M Klouda
 
-Special thanks to @bomajo for in depth and helpful code reviews and to @luchol for providing the repository and the tags, and issue templates necessary to row this boat to shore in a respectful manner. 
+Special thanks to @bomajo for in depth and helpful code reviews and to @luchol for providing the repository, the tags, and issue templates necessary to row this boat to shore.
 
 ## Authors and acknowledgment
 Thanks to the authors and maintainers of axios, dotenv, luxon, mongodb, mongoose, mqtt, node-cron, nodemailer, nodemon and jest for providing the tools neccesary to make this project come togheter!
