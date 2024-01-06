@@ -162,4 +162,4 @@ async function getRecieverList(clinic){
     }
 }
 
-module.exports = {connectToDB, subToEmails, unsubFromEmails, getSubscriber, getRecieverList, updateSubscriber}
+module.exports = {subToEmails, unsubFromEmails, getSubscriber, getRecieverList, updateSubscriber}
