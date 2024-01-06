@@ -67,7 +67,7 @@ async function subToEmails(message) {
             response = await formatResponse(parsedMessage, 400, validationError.toString(), 'invalid document') 
         }  else {              // Case: Valid subscriber --> saveing doc and formatting response to api
             await dbClient.connect()
-            console.log('Opened db connection')
+            console.log('Opened mongo connection')
 
             const db = dbClient.db(dbName)
             const collection = db.collection("Subscribers")
@@ -89,32 +89,30 @@ async function subToEmails(message) {
 async function unsubFromEmails(message) {
     try {
         const parsedMessage = JSON.parse(message)
+        
         const patient_ID = {patient_ID: parsedMessage.patient_ID}
 
         await dbClient.connect()
-        console.log('Opened db connection')
+        console.log('Opened mongo connection')
         const db = dbClient.db(dbName)
         const collection = db.collection("Subscribers")
         const subscriber = await collection.findOneAndDelete(patient_ID)
-        console.log('Looking for subscriber')
-
-        if (subscriber === null) { // Fail case no matching subscriber found
-            const response = await formatResponse(parsedMessage, 404, 'Subscriber not found', 'sub not found')
-            console.log('Delete failed:', subscriber, response)
-            await publishResponse('grp20/res/notification/unsub', response)
-        } else {                   // Success case, matching subscriber found
+        
+        let response
+        if (subscriber === null) { // case: no matching subscriber found / delete failed --> formatting response to api
+            response = await formatResponse(parsedMessage, 404, 'Subscriber not found', 'sub not found')
+        } else {                   // Case: subscriber found delete succesful --> formatting response to api
             parsedMessage.subscriber = subscriber
-            const response = await formatResponse(parsedMessage, 200, null, 'sub found')
-            console.log('Delete successful', subscriber, response)
-            await publishResponse('grp20/res/notification/unsub', response)
+            response = await formatResponse(parsedMessage, 200, null, 'sub found')
         }
+
+        await publishResponse('grp20/res/notification/unsub', response)
     } catch (err) {
         console.error('UNSUBFROMEMAIL ERROR', err)
     } finally {
         await dbClient.close();
         console.log('Closed mongo connection')
     }
-
 }
 
 // Update a subscribers clinic preffrence. 
