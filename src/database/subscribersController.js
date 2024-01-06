@@ -24,24 +24,25 @@ async function connectToDB() {
 async function getSubscriber(message) {
     try {
         let parsedMessage = JSON.parse(message)
+        
         const patient_ID = {patient_ID: parsedMessage.patient_ID}
 
         await dbClient.connect()
-        console.log('Opened db connection')
+        console.log('Opened mongo connection')
         const db = dbClient.db(dbName)
         const collection = db.collection("Subscribers")
         const subscriber = await collection.findOne(patient_ID)
-        console.log('Looking for subscriber')
 
-        if (subscriber === null) { // Fail case no matching subscriber found
-            const response = await formatResponse(parsedMessage, 404, 'Subscriber not found', 'sub not found')
-            await publishResponse('grp20/res/subscriber/get', response)
-        } else {                   // Success case, matching subscriber found
+        let response
+        if (subscriber === null) { // case: no matching subscriber --> formatting response to api
+            response = await formatResponse(parsedMessage, 404, 'Subscriber not found', 'sub not found')
+        } else {                   // case: subscriber found --> formatting response to api
             parsedMessage.subscriber = subscriber
-            const response = await formatResponse(parsedMessage, 200, null, 'sub found')
-            await publishResponse('grp20/res/subscriber/get', response)
+            response = await formatResponse(parsedMessage, 200, null, 'sub found')
+            
         }
-
+        
+        await publishResponse('grp20/res/subscriber/get', response)
     } catch (err) {
         console.error('GETSUBSCRIBER ERROR', err)
     } finally {
@@ -161,13 +162,12 @@ async function getRecieverList(clinic){
         const db = dbClient.db(dbName)
         const collection = db.collection("Subscribers")
         const subscribers = collection.find(filter) // returns cursor
-        console.log('Looking for subscribers')
         
         for await (const doc of subscribers) {
             receiverList.push(doc.email)
           }
-          console.log(receiverList)
-          return receiverList
+          
+        return receiverList
     } catch(err) {
         console.error(err)
     } finally {
