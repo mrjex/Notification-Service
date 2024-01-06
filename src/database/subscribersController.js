@@ -52,37 +52,32 @@ async function getSubscriber(message) {
 // Subscribe patient to emails by adding them to the notification database.
 async function subToEmails(message) {
     try {
-        // const pay = message.toString()
         const parsedMessage = JSON.parse(message)
-        
-        await dbClient.connect()
-        console.log('Opened db connection')
 
         const newSubscriber = new sub({
             patient_ID: parsedMessage.patient_ID,
             email: parsedMessage.email,
             clinic: parsedMessage.clinic
         })
-        const validationError = newSubscriber.validateSync()
+        
+        const validationError = newSubscriber.validateSync() // Validateing subscriber with mongoose schema
 
-        if (validationError) {
-            console.error(validationError)
-            const response = await formatResponse(parsedMessage, 400, 'Validation error', 'invalid document')
-            await publishResponse('grp20/res/notification/sub', response) 
-        }  else {
-            console.log('Validation passed');
-            
+        let response
+        if (validationError) { // Case: Invalid subscriber --> formatting response to api 
+            response = await formatResponse(parsedMessage, 400, validationError.toString(), 'invalid document') 
+        }  else {              // Case: Valid subscriber --> saveing doc and formatting response to api
+            await dbClient.connect()
+            console.log('Opened db connection')
+
             const db = dbClient.db(dbName)
             const collection = db.collection("Subscribers")
             const document = await collection.insertOne(newSubscriber)
-            console.log('Saving document')
-            console.log('Save Succsesful, saved document:', document)
             parsedMessage.subscriber = document
-            
-            const response = await formatResponse(parsedMessage, 201, null, 'document saved')
-            await publishResponse('grp20/res/notification/sub', response)
+
+            response = await formatResponse(parsedMessage, 201, null, 'document saved')
         }
 
+        await publishResponse('grp20/res/notification/sub', response)
     } catch (err) {
         console.error('SUBTOEMAIL ERROR', err)
     } finally {
