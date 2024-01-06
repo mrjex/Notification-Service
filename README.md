@@ -34,7 +34,7 @@ brew install node
 ``````
 
 ### Add .env file (in the root folder)
-The .env file contains information about the MQTT broker. This informatin is best contained locally on your computer, to keep your connections private. You will have to insert a BROKER_URL (separated in to MQTT_HOST and MQTT_PORT).
+The .env file contains information about the MQTT broker, your database cridentials and your email provider. This informatin is best contained locally on your computer, to keep your connections private. You will have to insert a BROKER_URL (separated in to MQTT_HOST and MQTT_PORT).
 
 For our instances of the service, we used a [HIVE](https://www.hivemq.com/mqtt/) private broker.
 
