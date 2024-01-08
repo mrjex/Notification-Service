@@ -149,10 +149,12 @@ async function getRecieverList(clinic){
         const collection = db.collection("Subscribers")
         const subscribers = collection.find(filter) // returns cursor
         
-        for await (const doc of subscribers) {
-            receiverList.push(doc.email)
-          }
-          
+        if(subscribers) {
+            for await (const doc of subscribers) {
+                receiverList.push(doc.email)
+              }
+        }
+        
         return receiverList
     } catch(err) {
         console.error(err)

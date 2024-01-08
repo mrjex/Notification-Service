@@ -17,7 +17,7 @@ async function sendNewTimeslotsEmail(topic) {
         console.log('CLINIC: ', clinic)
         receiverList = await getRecieverList(clinic)
         
-        if(receiverList !== undefined) {
+        if(receiverList > 0) {
             let email = await JSON.parse(JSON.stringify(newTimeslotsEmail))
             email.html = email.html.replace('[clinic]', clinic)
 
