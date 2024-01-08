@@ -4,7 +4,10 @@ require('../email/emailController')
 
 const mqttOptions = {
     host: process.env.MQTT_HOST,
-    port: process.env.MQTT_PORT
+    port: process.env.MQTT_PORT,
+    username: "dentanoid",
+    password: "dentanoid123"
+
 }
 
 const resClient = mqtt.connect(mqttOptions)
