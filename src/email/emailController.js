@@ -17,7 +17,7 @@ async function sendNewTimeslotsEmail(topic) {
         console.log('CLINIC: ', clinic)
         receiverList = await getRecieverList(clinic)
         
-        if(receiverList.length > 0) {
+        if(receiverList !== undefined) {
             let email = await JSON.parse(JSON.stringify(newTimeslotsEmail))
             email.html = email.html.replace('[clinic]', clinic)
 
@@ -42,8 +42,8 @@ async function sendBookingNotificationEmail(topic, message) {
         const clinic = await getClinic(message.appointment.clinic_id)
         let start = DateTime.fromISO(message.appointment.start_time).toFormat('yy-MM-dd HH:mm')
         let end = DateTime.fromISO(message.appointment.end_time).toFormat('yy-MM-dd HH:mm')
-        let email
         
+        let email
         if(topic  === 'grp20/req/booking/confirmation') { // Case confirmation
             email =  await JSON.parse(JSON.stringify(bookingConfirmationEmail))
         } else {                                          // Case cancellation
