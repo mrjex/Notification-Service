@@ -6,7 +6,9 @@ const {subToEmails, unsubFromEmails, getSubscriber, updateSubscriber} = require(
 
 const mqttOptions = {
     host: process.env.MQTT_HOST,
-    port: process.env.MQTT_PORT
+    port: process.env.MQTT_PORT,
+    username: "dentanoid",
+    password: "dentanoid123"
 }
 // TOPICS NEEDS TO BE SYNCED
 const subscriptionTopics = [
