@@ -1,5 +1,7 @@
 const axios = require('axios');
-const apiUrl = 'http://localhost:3000/'
+require('dotenv').config()
+
+const apiUrl = process.env.API_URL
 
 async function getClinic(clinic_id){
     try {
