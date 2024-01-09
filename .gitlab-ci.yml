@@ -63,6 +63,8 @@ build-docker-image:
     - echo -e "SMTP_HOST = $SMTP_HOST \n" >> .env
     - echo -e "SMTP_PORT = $SMTP_PORT \n" >> .env
 
+    - echo -e "API_URL = $API_URL \n" >> .env
+
 
     - docker context ls
     - docker info
