@@ -2,87 +2,69 @@ require('dotenv').config()
 const mongoose = require('mongoose')
 const {dbClient} = require('./databaseClient')
 const {publishResponse, formatResponse} = require('../mqtt/mqttResUtils')
-
 const sub = require('./models/subscriber')
 
-const dbName = process.env.DB_NAME // NotificationService
+const dbName = process.env.DB_NAME
 
-// --For devs-- Prove db connection with ping
-async function connectToDB() {
-    try {
-        await dbClient.connect()
-        await dbClient.db(dbName).command({ping: 1});
-        console.log("Pinged your deployment. You successfully connected to MongoDB!")
-
-    } finally {
-        // Ensures that the client will close when you finish/error
-        await dbClient.close();
-        console.log('Closed mongo connection')
-    }
-}
 // Gets which clinics a user is currently subscribed to
 async function getSubscriber(message) {
     try {
         let parsedMessage = JSON.parse(message)
+        
         const patient_ID = {patient_ID: parsedMessage.patient_ID}
 
         await dbClient.connect()
-        console.log('Opened db connection')
+        console.log('Opened mongo connection')
         const db = dbClient.db(dbName)
         const collection = db.collection("Subscribers")
         const subscriber = await collection.findOne(patient_ID)
-        console.log('Looking for subscriber')
 
-        if (subscriber === null) { // Fail case no matching subscriber found
-            const response = await formatResponse(parsedMessage, 404, 'Subscriber not found', 'sub not found')
-            await publishResponse('grp20/res/subscriber/get', response)
-        } else {                   // Success case, matching subscriber found
+        let response
+        if (subscriber === null) { // case: no matching subscriber --> formatting response to api
+            response = await formatResponse(parsedMessage, 404, 'Subscriber not found', 'sub not found')
+        } else {                   // case: subscriber found --> formatting response to api
             parsedMessage.subscriber = subscriber
-            const response = await formatResponse(parsedMessage, 200, null, 'sub found')
-            await publishResponse('grp20/res/subscriber/get', response)
+            response = await formatResponse(parsedMessage, 200, null, 'sub found')
+            
         }
-
+        
+        await publishResponse('grp20/res/subscriber/get', response)
     } catch (err) {
         console.error('GETSUBSCRIBER ERROR', err)
     } finally {
-        await dbClient.close();
+        await dbClient.close()
         console.log('Closed mongo connection')
     }
 } 
 // Subscribe patient to emails by adding them to the notification database.
 async function subToEmails(message) {
     try {
-        // const pay = message.toString()
         const parsedMessage = JSON.parse(message)
-        
-        await dbClient.connect()
-        console.log('Opened db connection')
 
         const newSubscriber = new sub({
             patient_ID: parsedMessage.patient_ID,
             email: parsedMessage.email,
             clinic: parsedMessage.clinic
         })
-        const validationError = newSubscriber.validateSync()
+        
+        const validationError = newSubscriber.validateSync() // Validateing subscriber with mongoose schema
 
-        if (validationError) {
-            console.error(validationError)
-            const response = await formatResponse(parsedMessage, 400, 'Validation error', 'invalid document')
-            await publishResponse('grp20/res/notification/sub', response) 
-        }  else {
-            console.log('Validation passed');
-            
+        let response
+        if (validationError) { // Case: Invalid subscriber --> formatting response to api 
+            response = await formatResponse(parsedMessage, 400, validationError.toString(), 'invalid document') 
+        }  else {              // Case: Valid subscriber --> saveing doc and formatting response to api
+            await dbClient.connect()
+            console.log('Opened mongo connection')
+
             const db = dbClient.db(dbName)
             const collection = db.collection("Subscribers")
             const document = await collection.insertOne(newSubscriber)
-            console.log('Saving document')
-            console.log('Save Succsesful, saved document:', document)
             parsedMessage.subscriber = document
-            
-            const response = await formatResponse(parsedMessage, 201, null, 'document saved')
-            await publishResponse('grp20/res/notification/sub', response)
+
+            response = await formatResponse(parsedMessage, 201, null, 'document saved')
         }
 
+        await publishResponse('grp20/res/notification/sub', response)
     } catch (err) {
         console.error('SUBTOEMAIL ERROR', err)
     } finally {
@@ -94,32 +76,30 @@ async function subToEmails(message) {
 async function unsubFromEmails(message) {
     try {
         const parsedMessage = JSON.parse(message)
+        
         const patient_ID = {patient_ID: parsedMessage.patient_ID}
 
         await dbClient.connect()
-        console.log('Opened db connection')
+        console.log('Opened mongo connection')
         const db = dbClient.db(dbName)
         const collection = db.collection("Subscribers")
         const subscriber = await collection.findOneAndDelete(patient_ID)
-        console.log('Looking for subscriber')
-
-        if (subscriber === null) { // Fail case no matching subscriber found
-            const response = await formatResponse(parsedMessage, 404, 'Subscriber not found', 'sub not found')
-            console.log('Delete failed:', subscriber, response)
-            await publishResponse('grp20/res/notification/unsub', response)
-        } else {                   // Success case, matching subscriber found
+        
+        let response
+        if (subscriber === null) { // case: no matching subscriber found / delete failed --> formatting response to api
+            response = await formatResponse(parsedMessage, 404, 'Subscriber not found', 'sub not found')
+        } else {                   // Case: subscriber found delete succesful --> formatting response to api
             parsedMessage.subscriber = subscriber
-            const response = await formatResponse(parsedMessage, 200, null, 'sub found')
-            console.log('Delete successful', subscriber, response)
-            await publishResponse('grp20/res/notification/unsub', response)
+            response = await formatResponse(parsedMessage, 200, null, 'sub found')
         }
+
+        await publishResponse('grp20/res/notification/unsub', response)
     } catch (err) {
         console.error('UNSUBFROMEMAIL ERROR', err)
     } finally {
-        await dbClient.close();
+        await dbClient.close()
         console.log('Closed mongo connection')
     }
-
 }
 
 // Update a subscribers clinic preffrence. 
@@ -127,30 +107,31 @@ async function unsubFromEmails(message) {
 async function updateSubscriber(message) {
     try {
         const parsedMessage = JSON.parse(message)
+        
         const patient_ID = {patient_ID: parsedMessage.patient_ID}
         const clinic = {clinic: parsedMessage.clinic}
 
         await dbClient.connect()
-        const collection = dbClient.db(dbName).collection("Subscribers");
-        
+        const collection = dbClient.db(dbName).collection("Subscribers")
         const subscriber = await collection.updateOne(patient_ID, {$set:clinic})
         parsedMessage.subscriber = subscriber       
         
         let response
-        if (subscriber.modifiedCount === 0) {    // Fail case no document modified
-            if (subscriber.matchedCount === 0) { // no matching subscriber found
+        if (subscriber.modifiedCount === 0) {    // case: no document modified
+            if (subscriber.matchedCount === 0) { // case: no document modified && no matching subscriber --> formatting response to api
                 response = await formatResponse(parsedMessage, 404, 'Subscriber not found', 'sub not found')
-            } else {
+            } else {                             // case: no document modified && new subscriber values are old subscriber values --> formatting response to api
                 response = await formatResponse(parsedMessage, 400, 'New value is old value', 'new is old')
             }
-        } else {                                  // Success case, matching subscriber found
+        } else {                                  // case: subscriber updated with new values --> formatting response to api
             response = await formatResponse(parsedMessage, 200, null, 'sub found')
         }
+
         await publishResponse('grp20/res/subscriber/update', response)
     } catch (err) {
         console.error('UPDATESUBSCRIBERPREFFRENCES ERROR', err)
     } finally {
-        await dbClient.close();
+        await dbClient.close()
         console.log('Closed mongo connection')
     }
 
@@ -167,19 +148,20 @@ async function getRecieverList(clinic){
         const db = dbClient.db(dbName)
         const collection = db.collection("Subscribers")
         const subscribers = collection.find(filter) // returns cursor
-        console.log('Looking for subscribers')
         
-        for await (const doc of subscribers) {
-            receiverList.push(doc.email)
-          }
-          console.log(receiverList)
-          return receiverList
+        if(subscribers) {
+            for await (const doc of subscribers) {
+                receiverList.push(doc.email)
+              }
+        }
+        
+        return receiverList
     } catch(err) {
         console.error(err)
     } finally {
-        await dbClient.close();
+        await dbClient.close()
         console.log('Closed mongo connection')
     }
 }
 
-module.exports = {connectToDB, subToEmails, unsubFromEmails, getSubscriber, getRecieverList, updateSubscriber}
+module.exports = {subToEmails, unsubFromEmails, getSubscriber, getRecieverList, updateSubscriber}

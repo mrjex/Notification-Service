@@ -36,7 +36,7 @@ async function publishResponse(topic, message, next) {
                 next(err)
             }
         console.log('Res client published message:', message)    
-        });
+        })
     } catch (err) {
         console.error(err)
     }

@@ -10,7 +10,7 @@ const mqttOptions = {
     username: "dentanoid",
     password: "dentanoid123"
 }
-// TOPICS NEEDS TO BE SYNCED
+
 const subscriptionTopics = [
     'grp20/req/notification/sub',
     'grp20/req/notification/unsub',
@@ -45,11 +45,9 @@ client.on("message", (topic, message) => {
         case 'grp20/req/booking/cancellation':
             sendBookingNotificationEmail(topic, message)
             break
-        default:
-            console.log('Unrecognised topic')
     }
-    if (topic.includes('grp20/availabletimes/live/')) { // proof of concept
-        sendNewTimeslotsEmail(topic)
+    if (topic.includes('grp20/availabletimes/live/')) {
+       sendNewTimeslotsEmail(topic)
     }
 })
 
