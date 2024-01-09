@@ -10,21 +10,19 @@ const { getPatient, getDentist } = require('../apiRequests/userRequests')
 const { getClinic } = require('../apiRequests/clinicRequests')
 const {failedEmails} = require('./resilientEmailDelivery/failedEmails')
 
-async function sendNewTimeslotsEmail(topic) {
+async function sendNewTimeslotsEmail(message) {
     try {
-        const topics = topic.split('/')
-        const clinic = topics.pop()
-        console.log('CLINIC: ', clinic)
-        receiverList = await getRecieverList(clinic)
-        
-        if(receiverList) {
-            let email = await JSON.parse(JSON.stringify(newTimeslotsEmail))
-            email.html = email.html.replace('[clinic]', clinic)
+        message =  JSON.parse(message)
 
-            receiverList = await getRecieverList(clinic)
+        receiverList = await getRecieverList(message.availabletime.clinic_id)
+       
+        if(receiverList.length > 0) {
+            let email = await JSON.parse(JSON.stringify(newTimeslotsEmail))
+            const clinic = await getClinic(message.availabletime.clinic_id)
+            email.html = email.html.replace('[clinic]', clinic.clinic_name)
             email.to = receiverList
+
             await sendEmail(email)
-            console.log(email)
         } else { 
             console.log('Zero patients subscribed to this clinic')
         }
@@ -55,7 +53,6 @@ async function sendBookingNotificationEmail(topic, message) {
             email.to = patient.email + ', ' + dentist.email
     
         await sendEmail(email)
-        console.log(email)
     } catch (err) {
         message.topic = topic
         failedEmails.set(message.requestID, message)

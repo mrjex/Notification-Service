@@ -40,11 +40,12 @@ async function getSubscriber(message) {
 async function subToEmails(message) {
     try {
         const parsedMessage = JSON.parse(message)
+        const clinics = JSON.parse(parsedMessage.clinic)
 
         const newSubscriber = new sub({
             patient_ID: parsedMessage.patient_ID,
             email: parsedMessage.email,
-            clinic: parsedMessage.clinic
+            clinic: clinics
         })
         
         const validationError = newSubscriber.validateSync() // Validateing subscriber with mongoose schema
@@ -107,13 +108,13 @@ async function unsubFromEmails(message) {
 async function updateSubscriber(message) {
     try {
         const parsedMessage = JSON.parse(message)
-        
+    
         const patient_ID = {patient_ID: parsedMessage.patient_ID}
-        const clinic = {clinic: parsedMessage.clinic}
-
+        const clinic = {clinic: JSON.parse(parsedMessage.clinic)}
+        
         await dbClient.connect()
         const collection = dbClient.db(dbName).collection("Subscribers")
-        const subscriber = await collection.updateOne(patient_ID, {$set:clinic})
+        const subscriber = await collection.updateOne(patient_ID, { $set: clinic })
         parsedMessage.subscriber = subscriber       
         
         let response
@@ -141,20 +142,18 @@ async function updateSubscriber(message) {
 async function getRecieverList(clinic){
     let receiverList = []
     try {
-        const filter = { clinic: { $eq: clinic } }
-        
+        const filter = {"clinic": { "$elemMatch": { "$in": [clinic] } } }
+
         await dbClient.connect()
         console.log('Opened db connection')
         const db = dbClient.db(dbName)
         const collection = db.collection("Subscribers")
         const subscribers = collection.find(filter) // returns cursor
-        
-        if(subscribers) {
-            for await (const doc of subscribers) {
-                receiverList.push(doc.email)
-              }
-        }
-        
+            
+        for await (const doc of subscribers) {
+            receiverList.push(doc.email)
+          }
+
         return receiverList
     } catch(err) {
         console.error(err)
