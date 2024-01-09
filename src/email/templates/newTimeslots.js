@@ -39,7 +39,7 @@ const newTimeslotsEmail = {
               }
           </style>
           <body>
-              <div style="border-color: #0275D8; border-style: solid">
+              <div>
                 <h3>Hi!</h3>
                 <p>New timeslots have been published at [clinic].</p>
                 <p>Sign in to book your slot now - <a href="https://patient-dusky.vercel.app/">Dentanoid</a></p>

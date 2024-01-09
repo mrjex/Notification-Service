@@ -47,7 +47,7 @@ client.on("message", (topic, message) => {
             break
     }
     if (topic.includes('grp20/availabletimes/live/')) {
-       sendNewTimeslotsEmail(topic)
+       sendNewTimeslotsEmail(message)
     }
 })
 
