@@ -54,14 +54,14 @@ build-docker-image:
     - echo -e "MQTT_HOST = $MQTT_HOST \n" >> .env
     - echo -e "MQTT_PORT = $MQTT_PORT \n" >> .env
 
-    - echo -e "EMAIL_SERVICE = "" \n" >> .env
-    - echo -e "EMAIL_USERNAME = "" \n" >> .env
-    - echo -e "EMAIL_PASSWORD = "" \n" >> .env
-    - echo -e "EMAIL_FROM = "" \n" >> .env
-    - echo -e "EMAIL_SENDER = "" \n" >> .env
-    - echo -e "EMAIL_USERNAME = "" \n" >> .env
-    - echo -e "SMTP_HOST = "" \n" >> .env
-    - echo -e "SMTP_PORT = "" \n" >> .env
+    - echo -e "EMAIL_SERVICE = $EMAIL_SERVICE \n" >> .env
+    - echo -e "EMAIL_USERNAME = $EMAIL_USERNAME \n" >> .env
+    - echo -e "EMAIL_PASSWORD = $EMAIL_PASSWORD \n" >> .env
+    - echo -e "EMAIL_FROM = $EMAIL_FROM \n" >> .env
+    - echo -e "EMAIL_SENDER = $EMAIL_SENDER \n" >> .env
+    - echo -e "EMAIL_USERNAME = $EMAIL_USERNAME \n" >> .env
+    - echo -e "SMTP_HOST = $SMTP_HOST \n" >> .env
+    - echo -e "SMTP_PORT = $SMTP_PORT \n" >> .env
 
 
     - docker context ls
