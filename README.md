@@ -1,5 +1,9 @@
 # Notification Service
 
+> ⚠️ **Disclaimer**: This is a **fork** of [Notification Service](https://github.com/Dentanoid/Notification-Service), originally created and maintained by the [Dentanoid Organization](https://github.com/Dentanoid)
+
+
+
 ## Description
 Welcome to this here Notification service! 
 
@@ -62,7 +66,6 @@ SMTP_PORT='YOUR_SMTP_PORT'
 ### Run Notification service
 In order to build and run the Patient API you need to type these commands in to your terminal:
 
-
 ```
 1. npm install
 
@@ -86,15 +89,17 @@ Did you not receive your highly sought after cancellation email? Fear not! Notif
 Why would mail not get delivered?
 Because DentaNoid is a system built with a microservices architecture, Notification service is dependent on other services running to get hold of information such as which clinic your appointment is at or what username your dentist has. In the unlikely event that one of these other services experiences some downtime, Notification Service will fail to deliver your mail immediately. But with the inclusion of cron jobs Notification Service makes sure the guys with blue sabers always win by delivering your email as soon as the other services hop back online. 
 
-## Support
-If you wish to receive help with anything at all regarding Notification Service do not hesitate to reach out to founder, maintainer and spokesperson at gusklouja@student.gu.se
-
 ## Roadmap
-Notification service will be under development during December 2023 and will be realised to the public in early January 2024. 
-## Contributing
-Dev: James A.M Klouda
+Notification service will be under development during December 2023 and will be realised to the public in early January 2024.
 
-Special thanks to @bomajo for in depth and helpful code reviews and to @luchol for providing the repository, the tags, and issue templates necessary to row this boat to shore.
+## Contributing Team
+
+James Klouda
+Jonatan Boman
+Mohamad Khalil
+Joel Mattsson
+Lucas Holter
+Cornelia Olofsson Larsson
 
 ## Authors and acknowledgment
 Thanks to the authors and maintainers of axios, dotenv, luxon, mongodb, mongoose, mqtt, node-cron, nodemailer, nodemon and jest for providing the tools neccesary to make this project come togheter!
