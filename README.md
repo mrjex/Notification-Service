@@ -94,12 +94,12 @@ Notification service will be under development during December 2023 and will be 
 
 ## Contributing Team
 
-James Klouda
-Jonatan Boman
-Mohamad Khalil
-Joel Mattsson
-Lucas Holter
-Cornelia Olofsson Larsson
+- James Klouda
+- Jonatan Boman
+- Mohamad Khalil
+- Joel Mattsson
+- Lucas Holter
+- Cornelia Olofsson Larsson
 
 ## Authors and acknowledgment
 Thanks to the authors and maintainers of axios, dotenv, luxon, mongodb, mongoose, mqtt, node-cron, nodemailer, nodemon and jest for providing the tools neccesary to make this project come togheter!
